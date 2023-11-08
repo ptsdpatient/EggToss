@@ -47,7 +47,9 @@ public class EggToss extends ApplicationAdapter {
 					nest.setPosition(nest.getX()-2f*speed, nest.getY());
 					if(nest.getX()<0)rightDirection=true;
 				}
-			} else {nest.setPosition(nest.getX(),nest.getY()-2f);
+			} else {
+				nest.setPosition(nest.getX(),nest.getY()-5f);
+
 		}}
 		public Rectangle getRectangle(){
 			this.nestBounds= nest.getBoundingRectangle();
@@ -67,10 +69,9 @@ public class EggToss extends ApplicationAdapter {
 		playerTexture = new Texture("player.png");
 		player=new Sprite(playerTexture);
 		player.setOrigin(player.getWidth()/2,player.getHeight()/2);
-		Nest nest1=new Nest(50,25,1,true);
-		Nest nest2 = new Nest(50,25+100* MathUtils.random(1,3),0.5f,false);
-		Nest nest3=new Nest(50,25+100* MathUtils.random(3,5),0.5f,false);
-		nestArray.add(nest1,nest2,nest3);
+		Nest nest1=new Nest(50, 25f,1,true);
+		Nest nest2 = new Nest(50,200f,0.4f,false);
+		nestArray.add(nest1,nest2);
 	}
 
 	@Override
@@ -88,9 +89,8 @@ public class EggToss extends ApplicationAdapter {
 		if(nextLevel){
 			if(nestArray.get(targetNest).nest.getY()<=25){
 				nextLevel=false;
-				nestArray.removeIndex(targetNest-1);
+				nestArray.removeIndex(0);
 				targetNest=0;
-				Gdx.app.log("",""+targetNest+" " + nestArray);
 		}
 		}
 
@@ -98,23 +98,31 @@ public class EggToss extends ApplicationAdapter {
 
 		if(fall){
 			for(Nest nest :nestArray){
-				if(acceleration<10 && playerBounds.overlaps(nest.getRectangle())){
-					targetNest= nestArray.indexOf(nest,true);
+				if(acceleration<-5 && playerBounds.overlaps(nest.getRectangle())){
+					if(nestArray.indexOf(nest,true)!=0) {
+						targetNest = nestArray.indexOf(nest, true);
+						nestArray.add(new Nest(MathUtils.random(0, Gdx.graphics.getWidth() - nest.nest.getWidth()), 400f , MathUtils.random(0.4f, 2.8f), false));
+						nextLevel=true;
+					}
 					player.setRotation(0);
 					jump=false;
 					fall=false;
-					nextLevel=true;
-					nestArray.add(new Nest(MathUtils.random(0,Gdx.graphics.getWidth()-nest.nest.getWidth()),Gdx.graphics.getHeight()+25*MathUtils.random(0,2),MathUtils.random(0.1f,2.2f),false));
-					Gdx.app.log("","next level : " + nextLevel);
+					acceleration=0;
+
 				}
 			}
+		}
 		if(player.getY()<-20){
+			for(Nest nest : nestArray){
+				if(nest.nest.getY()==-150f){
+					nestArray.removeValue(nest,true);
+				}
+				}
 			player.setRotation(0);
 			jump=false;
 			fall=false;
 			nextLevel=false;
-		}
-		}
+			}
 		batch.begin();
 		batch.draw(bgTexture,0,0);
 		player.draw(batch);
